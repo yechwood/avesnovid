@@ -20,7 +20,7 @@ class VideoScreeningService {
     AvesEntry entry,
     AvesVideoController controller,
   ) async {
-    final key = '\${entry.uri}|\${entry.dateModifiedMillis}|\${entry.sizeBytes}|\${entry.durationMillis}';
+    final key = '${entry.uri}|${entry.dateModifiedMillis}|${entry.sizeBytes}|${entry.durationMillis}';
     final cached = _cache[key];
     if (cached != null) return cached;
 
