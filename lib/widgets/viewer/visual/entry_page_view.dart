@@ -197,8 +197,23 @@ class _EntryPageViewState extends State<EntryPageView> with TickerProviderStateM
   }
 
   Widget _buildVideoView() {
-    final videoController = context.read<VideoConductor>().getController(entry);
-    if (videoController == null) return const SizedBox();
+    final videoConductor = context.read<VideoConductor>();
+    final videoController = videoConductor.getController(entry);
+    if (videoController == null) {
+      if (videoConductor.isBlocked(entry)) {
+        return const ColoredBox(
+          color: Colors.black,
+          child: Center(
+            child: Icon(
+              AIcons.lock,
+              size: 48,
+              color: Colors.white70,
+            ),
+          ),
+        );
+      }
+      return const SizedBox();
+    }
 
     return ValueListenableBuilder<double?>(
       valueListenable: videoController.sarNotifier,
