@@ -137,11 +137,13 @@ mixin EntryViewControllerMixin<T extends StatefulWidget> on State<T> {
       if (mounted) setState(() {});
       return;
     }
+    final videoController = controller;
+    if (videoController == null) return;
     setState(() {});
 
     if (videoAutoPlayEnabled || entry.isAnimated) {
-      final resumeTimeMillis = await controller.getResumeTime(context);
-      await _autoPlayVideo(controller, () => entry == entryNotifier.value, resumeTimeMillis: resumeTimeMillis);
+      final resumeTimeMillis = await videoController.getResumeTime(context);
+      await _autoPlayVideo(videoController, () => entry == entryNotifier.value, resumeTimeMillis: resumeTimeMillis);
     }
   }
 
