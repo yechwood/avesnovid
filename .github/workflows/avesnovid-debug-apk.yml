@@ -1,0 +1,40 @@
+name: Build avesnovid APK
+
+on:
+  push:
+    branches: ["develop"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Configure Play flavor
+        run: |
+          scripts/gen_flavor_play.sh
+          scripts/apply_flavor_play.sh
+
+      - name: Get Flutter packages
+        run: ./flutterw pub get
+
+      - name: Build debug APK
+        run: ./flutterw build apk --debug -t lib/main_play.dart --flavor play
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: avesnovid-debug-apk
+          path: build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
