@@ -7,11 +7,20 @@ import 'package:aves/model/settings/settings.dart';
 import 'package:aves/model/source/collection_lens.dart';
 import 'package:aves/services/common/services.dart';
 import 'package:aves/widgets/viewer/video/db_playback_state_handler.dart';
+import 'package:aves/services/video_screening_service.dart';
 import 'package:aves_model/aves_model.dart';
 import 'package:aves_video/aves_video.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+
+class VideoScreeningException implements Exception {
+  final String reason;
+  const VideoScreeningException(this.reason);
+
+  @override
+  String toString() => 'VideoScreeningException: $reason';
+}
 
 class VideoConductor {
   final CollectionLens? _collection;
@@ -19,6 +28,11 @@ class VideoConductor {
   final Map<AvesVideoController, StreamSubscription> _statusSubscriptions = {};
   final Map<AvesVideoController, StreamSubscription> _eventSubscriptions = {};
   final PlaybackStateHandler _playbackStateHandler = DatabasePlaybackStateHandler();
+  final Set<String> _blockedEntries = {};
+
+  bool isBlocked(AvesEntry entry) => _blockedEntries.contains(_entryKey(entry));
+
+  static String _entryKey(AvesEntry entry) => '${entry.uri}|${entry.pageId}';
 
   final ValueNotifier<AvesVideoController?> playingVideoControllerNotifier = ValueNotifier(null);
 
@@ -61,6 +75,17 @@ class VideoConductor {
         playbackStateHandler: _playbackStateHandler,
         settings: settings,
       );
+
+      // The controller is intentionally not registered with the viewer until
+      // screening has completed. This means a blocked item never gets a
+      // playable controller and can never be started accidentally.
+      final screening = await VideoScreeningService.screen(entry, controller);
+      if (!screening.allowed) {
+        _blockedEntries.add(_entryKey(entry));
+        await controller.dispose();
+        throw VideoScreeningException(screening.reason ?? 'blocked');
+      }
+
       _statusSubscriptions[controller] = controller.statusStream.listen((event) => _onControllerStatusChanged(entry, controller!, event));
       _eventSubscriptions[controller] = controller.eventStream.listen((event) => _onControllerEvent(entry, controller!, event));
     }
