@@ -205,7 +205,7 @@ class _EntryPageViewState extends State<EntryPageView> with TickerProviderStateM
           color: Colors.black,
           child: Center(
             child: Icon(
-              AIcons.lock,
+              AIcons.locked,
               size: 48,
               color: Colors.white70,
             ),
