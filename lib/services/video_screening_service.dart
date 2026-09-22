@@ -39,7 +39,7 @@ class VideoScreeningService {
         0,
         (controller.duration * .33).round(),
         (controller.duration * .66).round(),
-        (controller.duration - 250).clamp(0, controller.duration),
+        (controller.duration - 250).clamp(0, controller.duration).toInt(),
       }.toList()
         ..sort();
 
