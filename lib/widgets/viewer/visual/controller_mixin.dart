@@ -130,7 +130,13 @@ mixin EntryViewControllerMixin<T extends StatefulWidget> on State<T> {
   }
 
   Future<void> _initVideoController(AvesEntry entry) async {
-    final controller = await context.read<VideoConductor>().getOrCreateController(entry);
+    AvesVideoController? controller;
+    try {
+      controller = await context.read<VideoConductor>().getOrCreateController(entry);
+    } on VideoScreeningException {
+      if (mounted) setState(() {});
+      return;
+    }
     setState(() {});
 
     if (videoAutoPlayEnabled || entry.isAnimated) {
