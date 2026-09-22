@@ -104,6 +104,8 @@ dependencies:
   gpx:
   highlight:
   http:
+  image: ^4.10.1
+  nsfw_detector_flutter: ^2.0.2
   intl:
   intl4x:
   latlong2:
